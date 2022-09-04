@@ -59,6 +59,7 @@ func DealBridgeTask() {
 		case t := <-Bridge.CloseTask:
 			StopServer(t.Id)
 		case id := <-Bridge.CloseClient:
+			logs.Debug("delete tunnel and host for client id %d", id)
 			DelTunnelAndHostByClientId(id, true)
 			if v, ok := file.GetDb().JsonDb.Clients.Load(id); ok {
 				if v.(*file.Client).NoStore {
@@ -327,6 +328,7 @@ func DelTunnelAndHostByClientId(clientId int, justDelNoStore bool) {
 	})
 	for _, id := range ids {
 		DelTask(id)
+		logs.Debug("task %d deleted, client id %d", id, clientId)
 	}
 	ids = ids[:0]
 	file.GetDb().JsonDb.Hosts.Range(func(key, value interface{}) bool {
@@ -341,6 +343,7 @@ func DelTunnelAndHostByClientId(clientId int, justDelNoStore bool) {
 	})
 	for _, id := range ids {
 		file.GetDb().DelHost(id)
+		logs.Debug("host %d deleted, client id %d", id, clientId)
 	}
 }
 
