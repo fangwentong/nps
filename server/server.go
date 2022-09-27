@@ -130,7 +130,7 @@ func dealLeakTasks() {
 	for {
 		select {
 		case <-ticker.C:
-			detectLeakedTunnelAndHost(false)
+			detectAndDelLeakedTunnelAndHost(false)
 		}
 	}
 }
@@ -360,7 +360,7 @@ func DelTunnelAndHostByClientId(clientId int, justDelNoStore bool) {
 }
 
 //delete all host and tasks by client id
-func detectLeakedTunnelAndHost(justDelNoStore bool) {
+func detectAndDelLeakedTunnelAndHost(justDelNoStore bool) {
 	var ids []int
 	file.GetDb().JsonDb.Tasks.Range(func(key, value interface{}) bool {
 		v := value.(*file.Tunnel)
@@ -374,8 +374,8 @@ func detectLeakedTunnelAndHost(justDelNoStore bool) {
 		return true
 	})
 	for _, id := range ids {
-		//DelTask(id)
 		logs.Debug("Found Leaked Task %d", id)
+		DelTask(id)
 	}
 	ids = ids[:0]
 	file.GetDb().JsonDb.Hosts.Range(func(key, value interface{}) bool {
@@ -390,8 +390,8 @@ func detectLeakedTunnelAndHost(justDelNoStore bool) {
 		return true
 	})
 	for _, id := range ids {
-		//file.GetDb().DelHost(id)
 		logs.Debug("Found Leaked Host %d", id)
+		file.GetDb().DelHost(id)
 	}
 }
 
